@@ -16,7 +16,6 @@ Landmarks
 |
 compare with known Faces
 """
-import logging
 
 from camera import Camera
 from facedect import FaceDetect
@@ -28,11 +27,21 @@ FACE_MATCH_THRESHOLD = 0.91
 CAMERA_ADDRESS = "http://admin:admin@192.168.50.14:8081/"
 KNOWN_FACES_PICKLE_PATH = "known_peoples.pkl"
 
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(name)s - %(message)s')
-logger = logging.getLogger(__name__)
-
 unknown_peoples = {}
 known_peoples = loadKnownFacesPickle(KNOWN_FACES_PICKLE_PATH)
+
+face_detect = FaceDetect()
+face_recognize = FaceRecognize()
+
+
+def initNetwork():
+    """
+    初始化神经网络，不然第一次检测到人脸的时候加载神经网络需要6s...
+    :return:
+    """
+    frame = cv2.imread("test/elvis.png")
+    face_detect.detectFace(frame)
+    face_recognize.runImages(frame)
 
 
 def knownFaceMatchSuccess(people_name, face_image, face_node):
@@ -67,46 +76,46 @@ def unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=Tru
     saveFaceToFiles(face_image, path)
 
 
-def main():
-    cam = Camera(CAMERA_ADDRESS)
-    face_detect = FaceDetect()
-    face_recognize = FaceRecognize()
+@timer
+def performOneFrame(frame):
+    # 人脸部分图像
+    face_images, scores = face_detect.detectFace(frame, crop=True)
 
+    # 对图像内的每张人脸进行匹配
+    for face_image in face_images:
+        # 取得人脸标志点 和数据库内的人脸进行匹配
+        face_node = face_recognize.runImages(face_image)
+        people_name = faceMatch(face_node, known_peoples, FACE_MATCH_THRESHOLD)
+
+        # 认识这个人
+        if people_name:
+            logger.info("Match Faces! {}".format(people_name))
+            knownFaceMatchSuccess(people_name, face_image, face_node)
+
+        # 不认识这个人
+        else:
+            people_name = faceMatch(face_node, unknown_peoples, FACE_MATCH_THRESHOLD)
+
+            # 但是之前见过
+            if people_name:
+                logger.info("Match Unknown Faces {}".format(people_name))
+                unknownFaceMatchSuccess(people_name, face_image, face_node)
+
+            # 根本没见过
+            else:
+                people_name = "unknownPeople_{}".format(genRandomStrings())
+                unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=False)
+
+
+def main():
+    initNetwork()
+    cam = Camera(CAMERA_ADDRESS)
     while True:
         logger.debug("new frame")
         # 取得图像和
         frame = cam.get_frame()
         frame = imgRotation(frame, -90)
-        # 人脸部分图像
-        face_images, scores = face_detect.detectFace(frame, crop=True)
-
-        # 对图像内的每张人脸进行匹配
-        for face_image in face_images:
-            # 取得人脸标志点 和数据库内的人脸进行匹配
-            face_node = face_recognize.runImages(face_image)
-            people_name = faceMatch(face_node, known_peoples, FACE_MATCH_THRESHOLD)
-
-            # 认识这个人
-            if people_name:
-                logger.info("Match Faces!", people_name)
-                knownFaceMatchSuccess(people_name, face_image, face_node)
-
-            # 不认识这个人
-            else:
-                people_name = faceMatch(face_node, unknown_peoples, FACE_MATCH_THRESHOLD)
-
-                # 但是之前见过
-                if people_name:
-                    logger.info("Match Unknown Faces", people_name)
-                    unknownFaceMatchSuccess(people_name, face_image, face_node)
-
-                # 根本没见过
-                else:
-                    people_name = "unknownPeople_{}".format(genRandomStrings())
-                    unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=False)
-
-
-
+        performOneFrame(frame)
 
 
 if __name__ == '__main__':

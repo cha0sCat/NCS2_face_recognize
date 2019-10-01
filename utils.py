@@ -15,10 +15,14 @@ import time
 import numpy
 import random
 import pickle
+import logging
 
 from math import fabs, sin, radians, cos
-from main import logger
 from functools import wraps
+
+
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(name)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def timer(func):
@@ -27,7 +31,7 @@ def timer(func):
         before = time.time()
         result = func(*args, **kwargs)
         after = time.time() - before
-        logger.debug("perform", str(func), "use {} s".format(after))
+        logger.debug("perform {func_name}, use {times} s".format(func_name=str(func), times=after))
         return result
 
     return fake_func
