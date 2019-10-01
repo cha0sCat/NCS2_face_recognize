@@ -9,9 +9,7 @@
 @License :   (C)Copyright 2017-2019, cha0sCat
 @Desc    :   使用服务端进行人脸搜索
 """
-import json
 import flask
-import numpy as np
 import base64
 from flask import Flask, jsonify
 
