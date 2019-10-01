@@ -30,10 +30,36 @@ class FaceDetect:
                  network_input_h=300,
                  network_input_w=300):
         net = cv2.dnn.readNet(xml_path, bin_path)
+        net.setPreferableTarget(self.target_device)
         self.net = net
         self.network_input_h = network_input_h
         self.network_input_w = network_input_w
-        self.target_device = cv2.dnn.DNN_TARGET_MYRIAD
+
+    def _preprocessImage(self, frame):
+        """
+        对原始图像进行预处理，变为可以进入神经网络的格式
+        :param frame: cv2原图像
+        :return: 神经网络兼容的数据流
+        """
+        blob = cv2.dnn.blobFromImage(frame, size=(self.network_input_w, self.network_input_h), ddepth=cv2.CV_8U)
+        return blob
+
+    def _runInference(self, blob):
+        """
+        将图像送入NCS2进行识别
+        :param blob: 经过_preprocessImage处理的数据流
+        :return: 识别结果
+        """
+        self.net.setInput(blob)
+        out = self.net.forward()
+
+        return out
+
+    def runImages(self, frame):
+        blob = self._preprocessImage(frame)
+        out = self._runInference(blob)
+
+        return out.reshape(-1, 7)
 
     @timer
     def detectFace(self, frame, score=0.5, crop=False):
@@ -45,19 +71,14 @@ class FaceDetect:
         :param target_device: 计算设备(默认使用NCS2)
         :return: 人脸及对应置信度
         """
-        net = self.net
-        # Specify target device.
-        net.setPreferableTarget(self.target_device)
 
-        # Prepare input blob and perform an inference.
-        blob = cv2.dnn.blobFromImage(frame, size=(self.network_input_w, self.network_input_h), ddepth=cv2.CV_8U)
-        net.setInput(blob)
-        out = net.forward()
         image_w = frame.shape[1]
         image_h = frame.shape[0]
 
         faces, scores, cropImgs = [], [], []
-        for detection in out.reshape(-1, 7):
+        out = self.runImages(frame)
+
+        for detection in out:
             confidence = float(detection[2])
 
             if confidence > score:
