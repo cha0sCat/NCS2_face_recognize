@@ -10,14 +10,11 @@
 @Desc    :   None
 """
 
-from utils import timer
+from main import performOneFrame, initNetwork
 
-class Test:
-    @timer
-    def test(self, n):
-        for i in range(n):
-            n *= 10000
+import cv2
 
+initNetwork()
 
-t = Test()
-t.test(5000)
+frame = cv2.imread("test/pexels-photo.jpg")
+performOneFrame(frame)
