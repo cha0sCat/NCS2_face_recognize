@@ -11,7 +11,7 @@
 """
 import cv2
 
-from utils import timer
+from utils import timer, logger
 
 
 # 基于 face-detection-retail-0004 模型的人脸检测
@@ -30,7 +30,7 @@ class FaceDetect:
                  network_input_h=300,
                  network_input_w=300):
         net = cv2.dnn.readNet(xml_path, bin_path)
-        net.setPreferableTarget(self.target_device)
+        net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
         self.net = net
         self.network_input_h = network_input_h
         self.network_input_w = network_input_w
@@ -82,6 +82,7 @@ class FaceDetect:
             confidence = float(detection[2])
 
             if confidence > score:
+                logger.debug("Found a face, confidence is {}".format(confidence))
                 box_left = int(detection[3] * image_w)
                 box_top = int(detection[4] * image_h)
                 box_right = int(detection[5] * image_w)
