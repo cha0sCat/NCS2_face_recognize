@@ -10,11 +10,14 @@
 @Desc    :   None
 """
 
-from main import performOneFrame, initNetwork
+from main import performOneFrame, initNetwork, updateServerDataset
 
 import cv2
 
 initNetwork()
+updateServerDataset()
+updateServerDataset()
+updateServerDataset()
 
 frame = cv2.imread("test/pexels-photo.jpg")
 performOneFrame(frame)

@@ -16,16 +16,21 @@ Landmarks
 |
 compare with known Faces
 """
-import asyncio
+import json
+import base64
+import requests
 
 from camera import Camera
 from facedect import FaceDetect
 from facerecognize import cv2FaceRecognize as FaceRecognize
 from utils import *
 
+from concurrent.futures import ThreadPoolExecutor
+
 IMAGE_SAVE_PATH = "images/"
 FACE_MATCH_THRESHOLD = 0.91
 CAMERA_ADDRESS = "http://admin:admin@192.168.50.14:8081/"
+FACE_MATCH_SERVER_ADDRESS = "http://192.168.50.8:8088/"
 KNOWN_FACES_PICKLE_PATH = "known_peoples.pkl"
 
 unknown_peoples = {}
@@ -33,7 +38,7 @@ known_peoples = loadKnownFacesPickle(KNOWN_FACES_PICKLE_PATH)
 
 face_detect = FaceDetect()
 face_recognize = FaceRecognize()
-loop = asyncio.get_event_loop()
+executor = ThreadPoolExecutor(max_workers=5)
 
 
 def initNetwork():
@@ -44,6 +49,19 @@ def initNetwork():
     frame = cv2.imread("test/elvis.png")
     face_detect.detectFace(frame)
     face_recognize.runImages(frame)
+
+
+def updateServerDataset():
+    """
+    上传本地数据集到人脸搜索服务器
+    :return:
+    """
+    requests.post(
+        url=FACE_MATCH_SERVER_ADDRESS + "update",
+        data={
+            "known_peoples": base64.b64encode(pickle.dumps(known_peoples))
+        }
+    )
 
 
 def knownFaceMatchSuccess(people_name, face_image, face_node):
@@ -78,7 +96,7 @@ def unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=Tru
     saveFaceToFiles(face_image, path)
 
 
-async def runMatch(face_image, face_node):
+def runMatch(face_image, face_node):
     """
     异步进行面部比对
     因为numpy面部比对很费时间，比对一次需要0.007s 40次则需要0.28s
@@ -109,6 +127,43 @@ async def runMatch(face_image, face_node):
 
 
 @timer
+def runMatchOnServer(face_image, face_node):
+    """
+    使用远端服务器协同进行人脸搜索/比对
+    因为numpy面部比对很费时间，比对一次需要0.007s 40次则需要0.28s(树莓派上)
+    :param face_image: 人脸图像
+    :param face_node: face_recognize.runImages 的识别结果
+    :return: None
+    """
+    result = requests.post(
+        url=FACE_MATCH_SERVER_ADDRESS + "faceMatch",
+        data={
+            "face_node": base64.b64encode(pickle.dumps(face_node)),
+            "FACE_MATCH_THRESHOLD": FACE_MATCH_THRESHOLD
+        }
+    )
+    result = json.loads(result.text)
+    people_name = result["people_name"]
+
+    # 认识这个人
+    if result["known"]:
+        logger.info("Match Faces! {}".format(people_name))
+        knownFaceMatchSuccess(people_name, face_image, face_node)
+
+    # 不认识这个人
+    else:
+        # 但是之前见过
+        if result["exists_before"]:
+            logger.info("Match Unknown Faces {}".format(people_name))
+            unknownFaceMatchSuccess(people_name, face_image, face_node)
+
+        # 根本没见过
+        else:
+            people_name = "unknownPeople_{}".format(genRandomStrings())
+            unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=False)
+
+
+@timer
 def performOneFrame(frame):
     """
     处理一帧图像
@@ -122,12 +177,15 @@ def performOneFrame(frame):
     for face_image in face_images:
         # 取得人脸标志点 和数据库内的人脸进行匹配
         face_node = face_recognize.runImages(face_image)
-        # task = asyncio.create_task(runMatch(face_image, face_node))
-        loop.run_until_complete(runMatch(face_image, face_node))
+        # executor.submit(runMatch, face_image, face_node)
+        executor.submit(runMatchOnServer, face_image, face_node)
+        # runMatchOnServer(face_image, face_node)
+        # executor.submit(print, "test!")
 
 
 def main():
     initNetwork()
+    updateServerDataset()
     cam = Camera(CAMERA_ADDRESS)
     while True:
         logger.debug("------------------new frame----------------------")
