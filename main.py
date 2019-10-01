@@ -161,7 +161,7 @@ def runMatchOnServer(face_image, face_node):
 
         # 根本没见过
         else:
-            people_name = "unknownPeople_{}".format(genRandomStrings())
+            # people_name = "unknownPeople_{}".format(genRandomStrings())
             unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=False)
 
 
