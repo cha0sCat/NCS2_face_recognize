@@ -88,6 +88,7 @@ class cv2FaceRecognize:
         :param frame: cv2读入的图片原图
         :return:
         """
+        # blob = cv2.dnn.blobFromImage(frame, size=(self.network_input_w, self.network_input_h), ddepth=cv2.CV_8U)
         blob = cv2.dnn.blobFromImage(frame, size=(self.network_input_w, self.network_input_h))
 
         return blob
