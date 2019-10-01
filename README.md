@@ -23,3 +23,28 @@
 ### facedect.py
 这是用于检测图片中人脸位置的神经网络  
 可以直接通过 `network = FaceDetect()`进行初始化
+
+### facerecognize.py
+#### detectFace函数：  
+将facedect输出的人脸部分图片进行特征识别，返回一个512点的标志点list  
+
+#### 特别说明
+FaceRecognize类使用的是OPENVINO套件  
+但是因为会和FaceDetect(使用cv2套件)抢NCS设备   
+所以如果你想同时使用FaceDetect和FaceRecognize  
+那么就使用 cv2FaceRecognize类
+
+## utils.py
+一大堆小工具  
+包括：
+ - 图像处理
+ - 函数运行计时
+ - 人脸与已知人脸比对
+ - 读取已知人脸数据集
+ - 随机字符生成
+ - 保存图像
+ 
+## traning.py
+在程序跑了一段时间以后，images文件夹里面会多出各种人的人脸图片  
+这时候你就可以对每个人的文件夹进行命名，然后运行学习程序，  
+这样程序就会把这些人的人脸数据记录到已知人脸里了
