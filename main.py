@@ -75,8 +75,10 @@ def knownFaceMatchSuccess(people_name, face_image, face_node):
     global known_peoples
     # 学习+保存
     known_peoples[people_name].append(face_node)
-    if len(known_peoples[people_name]) <= 10:
-        saveFaceToFiles(face_image, people_name)
+    path = os.path.join(IMAGE_SAVE_PATH, people_name)
+    saveFaceToFiles(face_image, path)
+    # if len(known_peoples[people_name]) <= 10:
+    #     saveFaceToFiles(face_image, path)
 
 
 def unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=True):
@@ -175,6 +177,8 @@ def performOneFrame(frame):
 
     # 对图像内的每张人脸进行匹配
     for face_image in face_images:
+        if face_image is None:
+            continue
         # 取得人脸标志点 和数据库内的人脸进行匹配
         face_node = face_recognize.runImages(face_image)
         # executor.submit(runMatch, face_image, face_node)
