@@ -190,7 +190,7 @@ def performOneFrame(frame):
 def main():
     initNetwork()
     updateServerDataset()
-    cam = Camera(CAMERA_ADDRESS)
+    cam = Camera(CAMERA_ADDRESS, high_frame_mode=True)
     while True:
         logger.debug("------------------new frame----------------------")
         # 取得图像和
