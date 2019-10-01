@@ -113,7 +113,7 @@ class cv2FaceRecognize:
         blob = self._preprocessImage(frame)
         nodes = self._runInference(blob)
 
-        return nodes[0]
+        return tuple(nodes[0])
 
 
 if __name__ == '__main__':
