@@ -182,8 +182,9 @@ def performOneFrame(frame):
         # 取得人脸标志点 和数据库内的人脸进行匹配
         face_node = face_recognize.runImages(face_image)
         # executor.submit(runMatch, face_image, face_node)
-        executor.submit(runMatchOnServer, face_image, face_node)
-        # runMatchOnServer(face_image, face_node)
+        # executor.submit(runMatchOnServer, face_image, face_node)
+        # runMatch(face_image, face_node)
+        runMatchOnServer(face_image, face_node)
         # executor.submit(print, "test!")
 
 

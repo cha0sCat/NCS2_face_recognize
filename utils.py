@@ -66,6 +66,29 @@ def faceCompare(face1_output, face2_output, threshold=0.91) -> bool:
     return False
 
 
+def faceCompare_v2(face1_output, face2_output, threshold=0.91) -> bool:
+    """
+    两个人脸对比
+    :param face1_output: 人脸1
+    :param face2_output: 人脸2
+    :param threshold: 最高允许误差
+    :return: 是否匹配
+    """
+    if len(face1_output) != len(face2_output):
+        logger.error('length mismatch in faceMatch')
+        return False
+    total_diff = numpy.linalg.norm(numpy.array(face1_output) - numpy.array(face2_output))
+    logger.debug(' Total Difference is: ' + str(total_diff))
+    if total_diff < threshold:
+        # the total difference between the two is under the threshold so
+        # the faces match.
+        return True
+
+    # differences between faces was over the threshold above so
+    # they didn't match.
+    return False
+
+
 @timer
 def faceMatch(face1_output: list, known_peoples: dict, threshold: float = 0.91) -> str:
     """
@@ -84,7 +107,7 @@ def faceMatch(face1_output: list, known_peoples: dict, threshold: float = 0.91) 
     """
     for known_people_name, known_faces in known_peoples.items():
         for known_face in known_faces:
-            if faceCompare(face1_output, known_face, threshold):
+            if faceCompare_v2(face1_output, known_face, threshold):
                 return known_people_name
 
     return ""
