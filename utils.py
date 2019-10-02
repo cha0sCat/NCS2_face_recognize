@@ -16,13 +16,16 @@ import numpy
 import random
 import pickle
 import logging
+import requests
 
 from math import fabs, sin, radians, cos
 from functools import wraps
+from debug import Status
 
 
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(name)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
+status = Status()
 
 
 def timer(func):
@@ -32,6 +35,7 @@ def timer(func):
         result = func(*args, **kwargs)
         after = time.time() - before
         logger.debug("perform {func_name}, use {times} s".format(func_name=str(func), times=after))
+        status.last_time_use[str(func)] = after
         return result
 
     return fake_func
@@ -175,3 +179,11 @@ def loadKnownFacesPickle(path="known_peoples.pkl"):
 
     return {}
 
+
+def sendMessage2DeveloperByServerChan(title, content=None, SCKEY=None):
+    requests.get(
+        "https://sc.ftqq.com/{SCKEY}.send?text={title}{extra}".format(
+            SCKEY=SCKEY,
+            title=title,
+            extra="?desp={content}".format(content=content) if content else "")
+    )

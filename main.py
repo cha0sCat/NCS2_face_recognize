@@ -18,7 +18,7 @@ compare with known Faces
 """
 import json
 import base64
-import requests
+import traceback
 
 from camera import Camera
 from facedect import FaceDetect
@@ -32,6 +32,7 @@ FACE_MATCH_THRESHOLD = 0.91
 CAMERA_ADDRESS = "http://admin:admin@192.168.50.14:8081/"
 FACE_MATCH_SERVER_ADDRESS = "http://192.168.50.8:8088/"
 KNOWN_FACES_PICKLE_PATH = "known_peoples.pkl"
+SERVERCHAN_SCKEY = "SCU63275Tfe845e871e21d722235086ed00fbed1a5d94339c81c5e"
 
 unknown_peoples = {}
 known_peoples = loadKnownFacesPickle(KNOWN_FACES_PICKLE_PATH)
@@ -73,6 +74,7 @@ def knownFaceMatchSuccess(people_name, face_image, face_node):
     :return: None
     """
     global known_peoples
+    sendMessage2DeveloperByServerChan("老师来了", SCKEY=SERVERCHAN_SCKEY)
     # 学习+保存
     known_peoples[people_name].append(face_node)
     path = os.path.join(IMAGE_SAVE_PATH, people_name)
@@ -182,12 +184,13 @@ def performOneFrame(frame):
         # 取得人脸标志点 和数据库内的人脸进行匹配
         face_node = face_recognize.runImages(face_image)
         # executor.submit(runMatch, face_image, face_node)
-        # executor.submit(runMatchOnServer, face_image, face_node)
+        executor.submit(runMatchOnServer, face_image, face_node)
         # runMatch(face_image, face_node)
-        runMatchOnServer(face_image, face_node)
+        # runMatchOnServer(face_image, face_node)
         # executor.submit(print, "test!")
 
 
+@status.monitor
 def main():
     initNetwork()
     updateServerDataset()
@@ -201,4 +204,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    executor.submit(main)
+    p = status.p
+    while True:
+        try: exec(input(">"))
+        except: print(traceback.format_exc())
