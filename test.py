@@ -9,15 +9,15 @@
 @License :   (C)Copyright 2017-2019, cha0sCat
 @Desc    :   None
 """
-
-from main import performOneFrame, initNetwork, updateServerDataset
+from utils import sendMessage2DeveloperByServerChan
+from main import performOneFrame, initNetwork, updateServerDataset, SERVERCHAN_SCKEY
 
 import cv2
 
 initNetwork()
 updateServerDataset()
-updateServerDataset()
-updateServerDataset()
+
+sendMessage2DeveloperByServerChan("Server Start!", SCKEY=SERVERCHAN_SCKEY)
 
 frame = cv2.imread("test/pexels-photo.jpg")
 performOneFrame(frame)
