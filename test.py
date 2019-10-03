@@ -10,7 +10,7 @@
 @Desc    :   None
 """
 from utils import sendMessage2DeveloperByServerChan
-from main import performOneFrame, initNetwork, updateServerDataset, SERVERCHAN_SCKEY
+from main import processingOneFrame, initNetwork, updateServerDataset, SERVERCHAN_SCKEY
 
 import cv2
 
@@ -20,4 +20,4 @@ updateServerDataset()
 sendMessage2DeveloperByServerChan("Server Start!", SCKEY=SERVERCHAN_SCKEY)
 
 frame = cv2.imread("test/pexels-photo.jpg")
-performOneFrame(frame)
+processingOneFrame(frame)
