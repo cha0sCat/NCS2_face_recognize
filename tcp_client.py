@@ -42,4 +42,6 @@ class Client:
         sock.sendall(message)
         while True:
             data = sock.recv(1024)
+            if not data:
+                break
         return data

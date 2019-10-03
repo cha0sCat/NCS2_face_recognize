@@ -168,7 +168,7 @@ def runMatchOnServer(face_image, face_node):
 
 
 @timer
-def performOneFrame(frame):
+def processingOneFrame(frame):
     """
     处理一帧图像
     :param frame: 图像
@@ -200,7 +200,7 @@ def main():
         # 取得图像和
         frame = cam.get_frame()
         frame = imgRotation(frame, -90)
-        performOneFrame(frame)
+        processingOneFrame(frame)
 
 
 if __name__ == '__main__':
