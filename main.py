@@ -158,15 +158,8 @@ def runMatchOnServer(face_image, face_node):
 
     # 不认识这个人
     else:
-        # 但是之前见过
-        if result["exists_before"]:
-            logger.info("Match Unknown Faces {}".format(people_name))
-            unknownFaceMatchSuccess(people_name, face_image, face_node)
-
-        # 根本没见过
-        else:
-            # people_name = "unknownPeople_{}".format(genRandomStrings())
-            unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=False)
+        logger.info("Match Unknown Faces {}".format(people_name))
+        unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=result["exists_before"])
 
 
 @timer
@@ -197,7 +190,8 @@ def processingOneFrame(frame):
 @status.monitor
 def main():
     initNetwork()
-    updateServerDataset()
+    if FACE_MATCH_SERVER_AVAILABLE:
+        updateServerDataset()
     cam = Camera(CAMERA_ADDRESS, high_frame_mode=True)
     while True:
         logger.debug("------------------new frame----------------------")
