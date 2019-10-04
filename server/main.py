@@ -24,6 +24,22 @@ unknown_peoples = {}
 app = Flask(__name__)
 
 
+@app.route("/")
+def home():
+    """
+    服务端主页
+    :return:
+    """
+    return "人脸数据集信息:\n{}".format(
+        '\n'.join(
+            ["{people_name}: {face_node_len}".format(
+                people_name=known_people_name,
+                face_node_len=len(known_faces))
+                for known_people_name, known_faces in known_peoples.items()
+            ]) or "无"
+    )
+
+
 @app.route("/faceMatch", methods=['POST'])
 def face_match():
     """
