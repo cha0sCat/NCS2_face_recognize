@@ -10,7 +10,6 @@
 @Desc    :   各种工具
 """
 import os
-import cv2
 import time
 import numpy
 import random
@@ -113,28 +112,6 @@ def faceMatch(face1_output: list, known_peoples: dict, threshold: float = 0.91) 
     return ""
 
 
-def imgRotation(img, degree=90):
-    """
-    旋转原图，有时候摄像头要横着放，需要旋转图像方便识别
-    :param img: cv2原图
-    :param degree: 旋转度数
-    :return: 旋转后的图像
-    """
-    height, width = img.shape[:2]
-    # 旋转后的尺寸
-    height_new = int(width * fabs(sin(radians(degree))) + height * fabs(cos(radians(degree))))
-    width_new = int(height * fabs(sin(radians(degree))) + width * fabs(cos(radians(degree))))
-
-    mat_rotation = cv2.getRotationMatrix2D((width / 2, height / 2), degree, 1)
-
-    mat_rotation[0, 2] += (width_new - width) / 2  # 重点在这步，目前不懂为什么加这步
-    mat_rotation[1, 2] += (height_new - height) / 2  # 重点在这步
-
-    img_rotated = cv2.warpAffine(img, mat_rotation, (width_new, height_new), borderValue=(255, 255, 255))
-
-    return img_rotated
-
-
 def genRandomStrings(length: int = 5) -> str:
     """
     生成一串随机字符
@@ -142,26 +119,6 @@ def genRandomStrings(length: int = 5) -> str:
     :return: 生成结果
     """
     return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(length)])
-
-
-@timer
-def saveFaceToFiles(face_image, path: str) -> None:
-    """
-    将人脸的图像保存到指定位置
-    :param face_image:
-    :param path:
-    :return:
-    """
-    if os.path.exists(path):
-        if os.path.isdir(path):
-            pass
-        else:
-            os.mkdir(path)
-    else:
-        os.mkdir(path)
-    num = str(len(os.listdir(path))).zfill(3)
-    file_path = os.path.join(path, "{}.png".format(num))
-    cv2.imwrite(file_path, face_image)
 
 
 def loadKnownFacesPickle(path="known_peoples.pkl"):
