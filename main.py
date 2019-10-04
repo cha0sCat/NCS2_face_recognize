@@ -29,8 +29,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 IMAGE_SAVE_PATH = "images/"
 FACE_MATCH_THRESHOLD = 0.91
-CAMERA_ADDRESS = "http://admin:admin@192.168.50.14:8081/"
-FACE_MATCH_SERVER_ADDRESS = "http://192.168.50.8:8088/"
+CAMERA_ADDRESS = "http://admin:admin@192.168.31.4:8081/"
+FACE_MATCH_SERVER_ADDRESS = "http://192.168.31.3:8088/"
+FACE_MATCH_SERVER_AVAILABLE = requests.get(FACE_MATCH_SERVER_ADDRESS).status_code == 200
 KNOWN_FACES_PICKLE_PATH = "known_peoples.pkl"
 SERVERCHAN_SCKEY = "SCU63275Tfe845e871e21d722235086ed00fbed1a5d94339c81c5e"
 
@@ -100,10 +101,11 @@ def unknownFaceMatchSuccess(people_name, face_image, face_node, exist_before=Tru
     saveFaceToFiles(face_image, path)
 
 
-def runMatch(face_image, face_node):
+def runMatchOnLocal(face_image, face_node):
     """
-    异步进行面部比对
+    本地进行面部比对
     因为numpy面部比对很费时间，比对一次需要0.007s 40次则需要0.28s
+    (优化后一次约0.001s)
     :param face_image: 人脸图像
     :param face_node: face_recognize.runImages 的识别结果
     :return: None
@@ -183,9 +185,11 @@ def processingOneFrame(frame):
             continue
         # 取得人脸标志点 和数据库内的人脸进行匹配
         face_node = face_recognize.runImages(face_image)
-        # executor.submit(runMatch, face_image, face_node)
-        executor.submit(runMatchOnServer, face_image, face_node)
-        # runMatch(face_image, face_node)
+        if FACE_MATCH_SERVER_AVAILABLE:
+            executor.submit(runMatchOnServer, face_image, face_node)
+        else:
+            executor.submit(runMatchOnLocal, face_image, face_node)
+        # runMatchOnLocal(face_image, face_node)
         # runMatchOnServer(face_image, face_node)
         # executor.submit(print, "test!")
 

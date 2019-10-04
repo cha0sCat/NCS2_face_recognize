@@ -11,10 +11,8 @@
 """
 from openvino.inference_engine import IENetwork, IECore
 from utils import timer
-import sys
 import numpy
 import cv2
-import os
 
 
 class FaceRecognize:
