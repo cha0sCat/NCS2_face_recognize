@@ -26,7 +26,7 @@
 
 ### facerecognize.py
 #### detectFace函数：  
-将facedect输出的人脸部分图片进行特征识别，返回一个512点的标志点list  
+将facedect输出的人脸部分图片进行特征识别，返回一个512点的维list  
 
 #### 特别说明
 FaceRecognize类使用的是OPENVINO套件  
@@ -44,7 +44,7 @@ FaceRecognize类使用的是OPENVINO套件
  - 随机字符生成
  - 保存图像
  
- faceMatch 计算非常耗时，所以使用电脑进行识别，返回识别结果  
+ faceMatch 计算非常耗时，所以可以使用电脑进行识别，返回识别结果  
  服务端代码详见server
  
 ## traning.py
