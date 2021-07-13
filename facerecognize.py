@@ -70,8 +70,8 @@ class FaceRecognize:
 
 class cv2FaceRecognize:
     def __init__(self,
-                 bin_path="models/20180408-102900.bin",
-                 xml_path="models/20180408-102900.xml",
+                 bin_path="models/facenet-20180408-102900.bin",
+                 xml_path="models/facenet-20180408-102900.xml",
                  network_input_h=160,
                  network_input_w=160):
         net = cv2.dnn.readNet(xml_path, bin_path)
