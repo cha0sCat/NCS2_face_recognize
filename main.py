@@ -29,9 +29,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 IMAGE_SAVE_PATH = "images/"
 FACE_MATCH_THRESHOLD = 0.91
-CAMERA_ADDRESS = "http://admin:admin@192.168.31.4:8081/"
+CAMERA_ADDRESS = 0
 FACE_MATCH_SERVER_ADDRESS = "http://192.168.31.3:8088/"
-FACE_MATCH_SERVER_AVAILABLE = requests.get(FACE_MATCH_SERVER_ADDRESS).status_code == 200
+FACE_MATCH_SERVER_AVAILABLE = touchRemoteMatchServer(FACE_MATCH_SERVER_ADDRESS)
 KNOWN_FACES_PICKLE_PATH = "known_peoples.pkl"
 SERVERCHAN_SCKEY = "SCU63275Tfe845e871e21d722235086ed00fbed1a5d94339c81c5e"
 
@@ -192,12 +192,12 @@ def main():
     initNetwork()
     if FACE_MATCH_SERVER_AVAILABLE:
         updateServerDataset()
-    cam = Camera(CAMERA_ADDRESS, high_frame_mode=True)
+    cam = Camera(CAMERA_ADDRESS, high_frame_mode=False)
     while True:
         logger.debug("------------------new frame----------------------")
         # 取得图像和
         frame = cam.get_frame()
-        frame = imgRotation(frame, -90)
+        frame = imgRotation(frame, 0)
         processingOneFrame(frame)
 
 

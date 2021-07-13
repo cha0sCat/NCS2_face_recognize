@@ -22,7 +22,6 @@ from math import fabs, sin, radians, cos
 from functools import wraps
 from debug import Status
 
-
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 status = Status()
@@ -187,3 +186,10 @@ def sendMessage2DeveloperByServerChan(title, content=None, SCKEY=None):
             title=title,
             extra="?desp={content}".format(content=content) if content else "")
     )
+
+
+def touchRemoteMatchServer(server_address: str) -> bool:
+    try:
+        return requests.get(server_address, timeout=1).status_code == 200
+    except:
+        return False
