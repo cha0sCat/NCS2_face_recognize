@@ -30,7 +30,7 @@ class Status:
         def fake_func(*args, **kwargs):
             self.running = True
             try: func(*args, **kwargs)
-            except: pass
+            except: print(traceback.format_exc())
             self.running = False
 
         return fake_func
