@@ -9,7 +9,6 @@
 @License :   (C)Copyright 2017-2019, cha0sCat
 @Desc    :   单面孔人脸辨识
 """
-from openvino.inference_engine import IENetwork, IECore
 from utils import timer
 import numpy
 import cv2
@@ -20,6 +19,7 @@ class FaceRecognize:
                  bin_path="models/20180408-102900.bin",
                  xml_path="models/20180408-102900.xml",
                  DEVICE="MYRIAD"):
+        from openvino.inference_engine import IENetwork, IECore
         ie = IECore()
         net = IENetwork(model=xml_path, weights=bin_path)
         input_blob = next(iter(net.inputs))
